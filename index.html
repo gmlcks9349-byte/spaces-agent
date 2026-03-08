@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS — AI Director Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #0f0f0f;
+    --surface2: #141414;
+    --surface3: #1a1a1a;
+    --border: #1e1e1e;
+    --border2: #2a2a2a;
+    --border3: #363636;
+    --text: #e0e0e0;
+    --text-mid: #888;
+    --text-dim: #444;
+    --lime: #c8ff00;
+    --lime-bg: rgba(200,255,0,0.06);
+    --lime-border: rgba(200,255,0,0.3);
+    --cyan: #00b4d8;
+    --cyan-bg: rgba(0,180,216,0.06);
+    --orange: #D4692A;
+    --green: #377649;
+    --red: #e05555;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    background: rgba(8,8,8,0.97);
+    border-bottom: 1px solid var(--border2);
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left { display: flex; align-items: baseline; gap: 12px; }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 6px;
+    color: var(--lime);
+  }
+
+  .logo-ver {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: var(--text-dim);
+    border: 1px solid var(--border2);
+    padding: 2px 6px;
+    letter-spacing: 2px;
+  }
+
+  .logo-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  .btn-api {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--text-mid);
+    border: 1px solid var(--border2);
+    background: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-api:hover { border-color: var(--lime); color: var(--lime); }
+  .btn-api.active { border-color: var(--lime); color: var(--lime); }
+
+  /* ── MAIN ── */
+  .main {
+    padding: 80px 0 100px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  /* ── API KEY PANEL ── */
+  .api-panel {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    margin: 16px 28px;
+    padding: 20px;
+  }
+
+  .api-panel.open { display: block; }
+
+  .api-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .api-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 10px 14px;
+    outline: none;
+    margin-bottom: 10px;
+  }
+
+  .api-input:focus { border-color: var(--lime); }
+
+  .btn-save-api {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    background: var(--lime);
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 0 28px;
+    margin-bottom: 0;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* ── INPUT BOX ── */
+  .input-wrap {
+    background: var(--surface);
+    border: 1px solid var(--lime-border);
+    box-shadow: 0 0 24px var(--lime-bg);
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .input-inner {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px 18px;
+    gap: 12px;
+  }
+
+  .input-prompt {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--lime);
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  #mainInput {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    resize: none;
+    min-height: 52px;
+  }
+
+  #mainInput::placeholder { color: var(--text-dim); font-style: italic; }
+
+  .input-footer {
+    border-top: 1px solid var(--border);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .input-hint-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+
+  .btn-run {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    background: var(--lime);
+    color: #000;
+    border: none;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-run:hover { opacity: 0.85; }
+  .btn-run:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ── FLOW LINE ── */
+  .flow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+  }
+
+  .flow-line-v {
+    width: 1px;
+    height: 28px;
+    background: linear-gradient(to bottom, var(--border2), var(--border3));
+  }
+
+  .flow-arrow-down {
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--border3);
+  }
+
+  .flow-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin: 3px 0;
+  }
+
+  /* ── RESULT BLOCK ── */
+  .result-block {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+
+  .result-block.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .result-tag {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 2px 8px;
+    border: 1px solid;
+  }
+
+  .result-tag.skeleton { border-color: var(--lime); color: var(--lime); }
+  .result-tag.signal { border-color: var(--cyan); color: var(--cyan); }
+  .result-tag.mutator { border-color: var(--lime); color: var(--lime); }
+
+  .result-body {
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+
+  .loading-dots {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .loading-dots span {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--lime);
+    animation: dot-pulse 1.2s infinite;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot-pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── PASTE ZONE ── */
+  .paste-zone {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    overflow: hidden;
+  }
+
+  .paste-header {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .paste-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--lime);
+    border: 1px solid var(--lime-border);
+    padding: 2px 6px;
+    text-transform: uppercase;
+  }
+
+  .paste-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+  }
+
+  .paste-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .paste-col {
+    padding: 12px 14px;
+    border-right: 1px solid var(--border);
+  }
+
+  .paste-col:last-child { border-right: none; }
+
+  .paste-col-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .paste-textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 8px 10px;
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+  }
+
+  .paste-textarea:focus { border-color: var(--lime-border); }
+  .paste-textarea::placeholder { color: var(--text-dim); font-style: italic; }
+
+  .btn-process-paste {
+    width: 100%;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--border2);
+    color: var(--lime);
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-process-paste:hover { background: var(--lime-bg); }
+
+  /* ── PANELS ── */
+  .panels-container {
+    display: none;
+  }
+
+  .panels-container.visible { display: block; }
+
+  .panel-popup {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    overflow: hidden;
+    margin-bottom: 0;
+    animation: panel-in 0.3s ease;
+  }
+
+  .panel-popup.visible { display: block; }
+
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .panel-num-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    border: 1px solid var(--border2);
+    padding: 2px 6px;
+  }
+
+  .panel-title-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 4px;
+  }
+
+  .panel-status {
+    margin-left: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .panel-body {
+    padding: 16px;
+  }
+
+  /* NODE CARD */
+  .node-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+
+  .node-card:last-child { margin-bottom: 0; }
+
+  .node-card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .node-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+
+  .node-card-content {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .node-card-content.dim { color: var(--text-mid); }
+
+  .highlight-box {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-left: 2px solid var(--lime);
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+    line-height: 1.7;
+    margin-top: 6px;
+    white-space: pre-wrap;
+  }
+
+  .highlight-box.cyan { border-left-color: var(--cyan); }
+
+  /* CHECKLIST */
+  .checklist {
+    margin-top: 8px;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 12px; height: 12px;
+    border: 1px solid var(--border3);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--lime);
+    border-color: var(--lime);
+  }
+
+  .check-item.checked .check-box::after {
+    content: '';
+    width: 6px; height: 4px;
+    border-left: 1.5px solid #000;
+    border-bottom: 1.5px solid #000;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+
+  .check-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-mid);
+    line-height: 1.5;
+  }
+
+  .check-item.checked .check-label {
+    color: var(--text-dim);
+    text-decoration: line-through;
+  }
+
+  /* PANEL FOOTER */
+  .panel-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+
+  .panel-progress {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .btn-next-panel {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text-dim);
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-next-panel.ready {
+    border-color: var(--lime);
+    color: var(--lime);
+  }
+
+  .btn-next-panel.ready:hover {
+    background: var(--lime);
+    color: #000;
+  }
+
+  /* ── SCENE CARDS ── */
+  .scene-cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .scene-card {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    overflow: hidden;
+  }
+
+  .scene-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface3);
+  }
+
+  .scene-card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--lime);
+    text-transform: uppercase;
+  }
+
+  .scene-card-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text-mid);
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .scene-card-copy:hover { border-color: var(--lime); color: var(--lime); }
+  .scene-card-copy.copied { border-color: var(--lime); color: var(--lime); }
+
+  .scene-card-body {
+    padding: 10px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* BRANCH TAG */
+  .branch-row { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+
+  .b-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    padding: 2px 6px;
+    border: 1px solid var(--border2);
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .b-tag.on-lime { border-color: var(--lime); color: var(--lime); }
+  .b-tag.on-cyan { border-color: var(--cyan); color: var(--cyan); }
+
+  /* COMPLETE BANNER */
+  .complete-banner {
+    display: none;
+    background: var(--lime-bg);
+    border: 1px solid var(--lime-border);
+    padding: 20px 24px;
+    text-align: center;
+  }
+
+  .complete-banner.visible { display: block; }
+
+  .complete-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 6px;
+    color: var(--lime);
+    margin-bottom: 6px;
+  }
+
+  .complete-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-mid);
+  }
+
+  .btn-reset {
+    margin-top: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+
+  .btn-reset:hover { border-color: var(--text-mid); color: var(--text-mid); }
+
+  /* ERROR */
+  .error-msg {
+    display: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    padding: 8px 0;
+  }
+
+  .error-msg.visible { display: block; }
+
+  /* SKELETON RESULT SPECIAL */
+  .skeleton-badge {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    border: 1px solid var(--lime);
+    color: var(--lime);
+    padding: 3px 10px;
+    margin-bottom: 10px;
+  }
+
+  .divider-line {
+    height: 1px;
+    background: var(--border2);
+    margin: 16px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">JARVIS</div>
+    <div class="logo-ver">V.01</div>
+    <div class="logo-sub">AI DIRECTOR TOOL</div>
+  </div>
+  <button class="btn-api" id="btnApiToggle" onclick="toggleApiPanel()">○ API KEY</button>
+</div>
+
+<!-- API PANEL -->
+<div class="api-panel" id="apiPanel">
+  <div class="api-label">CLAUDE API KEY</div>
+  <input type="password" class="api-input" id="apiKeyInput" placeholder="sk-ant-..." />
+  <button class="btn-save-api" onclick="saveApiKey()">SAVE KEY</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- INPUT SECTION -->
+  <div class="section" style="padding-top:16px;">
+    <div class="section-label">// INPUT — 제작 목표를 자유 서술하세요</div>
+    <div class="input-wrap">
+      <div class="input-inner">
+        <div class="input-prompt">></div>
+        <textarea id="mainInput" rows="2" placeholder="스트릿웨어 관련 4개의 씬에서 4명의 모델이 각각 포즈를 잡고있는 정적인 영상들을 제작하여 하나의 동영상으로 만들것입니다."></textarea>
+      </div>
+      <div class="input-footer">
+        <div class="input-hint-text">// 브랜드명, 씬 수, 톤, 방향 모두 자유 서술 가능</div>
+        <button class="btn-run" id="btnRun" onclick="runAnalysis()">ANALYZE →</button>
+      </div>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- SKELETON RESULT -->
+  <div class="flow-connector" id="fc1" style="display:none;">
+    <div class="flow-line-v"></div>
+    <div class="flow-tag">claude reads input</div>
+    <div class="flow-line-v"></div>
+    <div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="section" id="skeletonSection" style="display:none;">
+    <div class="result-block visible" id="skeletonResult">
+      <div class="result-header">
+        <div class="result-tag skeleton">SKELETON SELECT</div>
+        <div id="skeletonLoading" class="loading-dots"><span></span><span></span><span></span></div>
+        <div id="skeletonStatus" style="font-family:'Space Mono',monospace;font-size:8px;color:var(--text-dim);display:none;"></div>
+      </div>
+      <div class="result-body" id="skeletonBody" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- SIGNAL GUIDE -->
+  <div class="flow-connector" id="fc2" style="display:none;">
+    <div class="flow-line-v"></div>
+    <div class="flow-tag">upstream — tool sequence</div>
+    <div class="flow-line-v"></div>
+    <div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="section" id="signalSection" style="display:none;">
+    <div class="result-block visible">
+      <div class="result-header">
+        <div class="result-tag signal">STEP 01 — SIGNAL</div>
+      </div>
+      <div class="result-body" id="signalBody"></div>
+    </div>
+  </div>
+
+  <div class="flow-connector" id="fc3" style="display:none;">
+    <div class="flow-line-v"></div>
+    <div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="section" id="mutatorSection" style="display:none;">
+    <div class="result-block visible">
+      <div class="result-header">
+        <div class="result-tag mutator">STEP 02 — THE MUTATOR</div>
+      </div>
+      <div class="result-body" id="mutatorBody"></div>
+    </div>
+  </div>
+
+  <!-- PASTE ZONE -->
+  <div class="flow-connector" id="fc4" style="display:none;">
+    <div class="flow-line-v"></div>
+    <div class="flow-tag">paste mutator outputs</div>
+    <div class="flow-line-v"></div>
+    <div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="section" id="pasteSection" style="display:none;">
+    <div class="paste-zone">
+      <div class="paste-header">
+        <div class="paste-tag">PASTE INPUT</div>
+        <div class="paste-desc">THE MUTATOR 실행 후 COPY ALL T2I + I2V 텍스트를 붙여넣으세요</div>
+      </div>
+      <div class="paste-inputs">
+        <div class="paste-col">
+          <div class="paste-col-label">COPY ALL T2I</div>
+          <textarea class="paste-textarea" id="t2iPaste" placeholder="THE MUTATOR → COPY ALL T2I 텍스트 붙여넣기"></textarea>
+        </div>
+        <div class="paste-col">
+          <div class="paste-col-label">COPY ALL I2V</div>
+          <textarea class="paste-textarea" id="i2vPaste" placeholder="THE MUTATOR → COPY ALL I2V 텍스트 붙여넣기"></textarea>
+        </div>
+      </div>
+      <button class="btn-process-paste" onclick="processPaste()">→ PANEL 01 시작</button>
+    </div>
+  </div>
+
+  <!-- PANELS -->
+  <div class="flow-connector" id="fc5" style="display:none;">
+    <div class="flow-line-v"></div>
+    <div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="panels-container" id="panelsContainer">
+
+    <!-- PANEL 01 -->
+    <div class="section" style="margin-bottom:0;" id="panelWrap01">
+      <div class="panel-popup" id="panel01">
+        <div class="panel-header">
+          <div class="panel-num-badge">PANEL 01</div>
+          <div class="panel-title-text" style="color:var(--lime);">CREATIVE BOARD</div>
+          <div class="panel-status" id="status01">0 / 3 완료</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>TEXT NODE 구성</div>
+            <div class="node-card-content" id="p01TextNodes">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>SPACES 실행 안내</div>
+            <div class="node-card-content dim">각 Text Node를 Image Generator 노드에 연결 후 실행하세요.
+씬별로 Text Node 1개 → Image Generator 1개 매핑합니다.</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>인물 제거</div>
+            <div class="node-card-content dim"><span class="b-tag" style="font-size:7px;">EXTERNAL WORK</span>
+이미지 생성 완료 후 외부 툴로 인물 제거 작업을 진행하세요.
+배경 이미지 N장 확보 후 체크리스트를 완료하세요.</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>CHECKLIST</div>
+            <div class="checklist" id="checklist01">
+              <div class="check-item" onclick="toggleCheck(this, '01')">
+                <div class="check-box"></div>
+                <div class="check-label">씬별 이미지 생성 완료</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '01')">
+                <div class="check-box"></div>
+                <div class="check-label">인물 제거 완료 (외부 작업)</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '01')">
+                <div class="check-box"></div>
+                <div class="check-label">배경 이미지 N장 확보</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="panel-footer">
+          <div class="panel-progress" id="progress01">PANEL 01 / 05</div>
+          <button class="btn-next-panel" id="btnNext01" onclick="nextPanel(2)">PANEL 02 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-connector" id="fc_p01p02" style="display:none;">
+      <div class="flow-line-v"></div><div class="flow-arrow-down"></div>
+    </div>
+
+    <!-- PANEL 02 -->
+    <div class="section" style="margin-bottom:0;display:none;" id="panelWrap02">
+      <div class="panel-popup" id="panel02">
+        <div class="panel-header">
+          <div class="panel-num-badge">PANEL 02</div>
+          <div class="panel-title-text" style="color:var(--cyan);">APPAREL & MODEL REF</div>
+          <div class="panel-status" id="status02">0 / 3 완료</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>REFERENCES 업로드</div>
+            <div class="node-card-content dim">Freepik Spaces에서 다음 노드를 구성하세요:
+— Creation 노드: 제품 이미지 업로드
+— Model 노드 ×N: 모델별 이미지 업로드</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>SHOT TYPE</div>
+            <div class="node-card-content" id="p02ShotType">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>ASSISTANT NODE 템플릿</div>
+            <div class="node-card-content" id="p02AssistantTemplate">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>CHECKLIST</div>
+            <div class="checklist" id="checklist02">
+              <div class="check-item" onclick="toggleCheck(this, '02')">
+                <div class="check-box"></div>
+                <div class="check-label">모델 Pose 이미지 생성 완료</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '02')">
+                <div class="check-box"></div>
+                <div class="check-label">흰 배경 일관성 확인</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '02')">
+                <div class="check-box"></div>
+                <div class="check-label">착장 확인</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="panel-footer">
+          <div class="panel-progress">PANEL 02 / 05</div>
+          <button class="btn-next-panel" id="btnNext02" onclick="nextPanel(3)">PANEL 03 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-connector" id="fc_p02p03" style="display:none;">
+      <div class="flow-line-v"></div><div class="flow-arrow-down"></div>
+    </div>
+
+    <!-- PANEL 03 -->
+    <div class="section" style="margin-bottom:0;display:none;" id="panelWrap03">
+      <div class="panel-popup" id="panel03">
+        <div class="panel-header">
+          <div class="panel-num-badge">PANEL 03</div>
+          <div class="panel-title-text" style="color:var(--orange);">SCENE PRODUCTION</div>
+          <div class="panel-status" id="status03">0 / 3 완료</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>준비물 확인</div>
+            <div class="node-card-content dim">— Panel 01 완료: 배경 이미지 N장 (인물 제거 완료)
+— Panel 02 완료: 모델 Pose 이미지 N장</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>ASSISTANT NODE — 합성 템플릿</div>
+            <div class="node-card-content" id="p03Template">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>씬별 실행</div>
+            <div class="node-card-content" id="p03SceneList">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>CHECKLIST</div>
+            <div class="checklist" id="checklist03">
+              <div class="check-item" onclick="toggleCheck(this, '03')">
+                <div class="check-box"></div>
+                <div class="check-label">합성 이미지 N개 완료</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '03')">
+                <div class="check-box"></div>
+                <div class="check-label">조명 일관성 확인</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '03')">
+                <div class="check-box"></div>
+                <div class="check-label">합성 퀄리티 확인</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="panel-footer">
+          <div class="panel-progress">PANEL 03 / 05</div>
+          <button class="btn-next-panel" id="btnNext03" onclick="nextPanel(4)">PANEL 04 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-connector" id="fc_p03p04" style="display:none;">
+      <div class="flow-line-v"></div><div class="flow-arrow-down"></div>
+    </div>
+
+    <!-- PANEL 04 -->
+    <div class="section" style="margin-bottom:0;display:none;" id="panelWrap04">
+      <div class="panel-popup" id="panel04">
+        <div class="panel-header">
+          <div class="panel-num-badge">PANEL 04</div>
+          <div class="panel-title-text" style="color:#4a9e61;">VIDEO PRODUCTION</div>
+          <div class="panel-status" id="status04">0 / 3 완료</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>I2V 프롬프트 — 처리 완료</div>
+            <div class="node-card-content dim" style="margin-bottom:4px;">인물 묘사 자동 제거 완료 — 카메라/씬 지시만 사용합니다.
+Freepik Video Generator가 이미지를 직접 참조하므로 인물 묘사 불필요.</div>
+            <div class="node-card-content" id="p04I2VPrompts">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>VIDEO GEN 실행</div>
+            <div class="node-card-content" id="p04VideoGuide">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>트랜지션</div>
+            <div class="node-card-content" id="p04Transition">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>CHECKLIST</div>
+            <div class="checklist" id="checklist04">
+              <div class="check-item" onclick="toggleCheck(this, '04')">
+                <div class="check-box"></div>
+                <div class="check-label">씬별 영상 N개 완료</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '04')">
+                <div class="check-box"></div>
+                <div class="check-label">카메라 무브 확인</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '04')">
+                <div class="check-box"></div>
+                <div class="check-label">전체 시퀀스 프리뷰</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="panel-footer">
+          <div class="panel-progress">PANEL 04 / 05</div>
+          <button class="btn-next-panel" id="btnNext04" onclick="nextPanel(5)">PANEL 05 →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-connector" id="fc_p04p05" style="display:none;">
+      <div class="flow-line-v"></div><div class="flow-arrow-down"></div>
+    </div>
+
+    <!-- PANEL 05 -->
+    <div class="section" style="margin-bottom:0;display:none;" id="panelWrap05">
+      <div class="panel-popup" id="panel05">
+        <div class="panel-header">
+          <div class="panel-num-badge">PANEL 05</div>
+          <div class="panel-title-text" style="color:var(--text-mid);">FINAL</div>
+          <div class="panel-status" id="status05">0 / 3 완료</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>EDIT ORDER — CapCut</div>
+            <div class="node-card-content" id="p05EditOrder">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>AUDIO DIRECTION</div>
+            <div class="node-card-content" id="p05Audio">—</div>
+          </div>
+
+          <div class="node-card">
+            <div class="node-card-label"><span class="node-dot"></span>CHECKLIST</div>
+            <div class="checklist" id="checklist05">
+              <div class="check-item" onclick="toggleCheck(this, '05')">
+                <div class="check-box"></div>
+                <div class="check-label">타임라인 배치 완료</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '05')">
+                <div class="check-box"></div>
+                <div class="check-label">BGM 적용 완료</div>
+              </div>
+              <div class="check-item" onclick="toggleCheck(this, '05')">
+                <div class="check-box"></div>
+                <div class="check-label">최종 익스포트 완료</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="panel-footer">
+          <div class="panel-progress">PANEL 05 / 05</div>
+          <button class="btn-next-panel" id="btnNext05" onclick="completePipeline()">COMPLETE ✓</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panels-container -->
+
+  <!-- COMPLETE -->
+  <div class="flow-connector" id="fc_complete" style="display:none;">
+    <div class="flow-line-v"></div><div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="section" id="completeBannerWrap" style="display:none;">
+    <div class="complete-banner visible">
+      <div class="complete-title">PIPELINE COMPLETE</div>
+      <div class="complete-sub">ALL 5 PANELS CONFIRMED — FINAL VIDEO READY</div>
+      <button class="btn-reset" onclick="resetAll()">↺ NEW SESSION</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  // ── STATE ──
+  let state = {
+    apiKey: localStorage.getItem('claude_key') || '',
+    analysisResult: null,
+    t2iText: '',
+    i2vText: '',
+    i2vCleaned: '',
+    checkCounts: { '01': 0, '02': 0, '03': 0, '04': 0, '05': 0 },
+    checkTotals: { '01': 3, '02': 3, '03': 3, '04': 3, '05': 3 },
+    currentPanel: 0
+  };
+
+  // Init
+  window.onload = () => {
+    if (state.apiKey) {
+      document.getElementById('apiKeyInput').value = state.apiKey;
+      document.getElementById('btnApiToggle').classList.add('active');
+      document.getElementById('btnApiToggle').textContent = '● API KEY';
+    }
+    updateAllNextButtons();
+  };
+
+  // ── API KEY ──
+  function toggleApiPanel() {
+    document.getElementById('apiPanel').classList.toggle('open');
+  }
+
+  function saveApiKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) return;
+    localStorage.setItem('claude_key', key);
+    state.apiKey = key;
+    document.getElementById('btnApiToggle').classList.add('active');
+    document.getElementById('btnApiToggle').textContent = '● API KEY';
+    document.getElementById('apiPanel').classList.remove('open');
+  }
+
+  // ── CLAUDE API CALL ──
+  async function callClaude(systemPrompt, userMessage, maxTokens = 2000) {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': state.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }]
+      })
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.content[0].text;
+  }
+
+  // ── MAIN ANALYSIS ──
+  async function runAnalysis() {
+    if (!state.apiKey) { showError('API KEY를 먼저 입력하세요.'); return; }
+    const input = document.getElementById('mainInput').value.trim();
+    if (!input) { showError('제작 목표를 입력하세요.'); return; }
+
+    hideError();
+    document.getElementById('btnRun').disabled = true;
+
+    // Show skeleton section
+    show('fc1'); show('skeletonSection');
+    document.getElementById('skeletonLoading').style.display = 'flex';
+    document.getElementById('skeletonBody').style.display = 'none';
+    document.getElementById('skeletonStatus').style.display = 'none';
+
+    const systemPrompt = `You are JARVIS, an AI Director tool for Freepik Spaces workflow automation.
+
+Analyze the user's production goal and return a JSON response with this exact structure:
+{
+  "skeleton": "Fashion Campaign",
+  "campaign_type": "Static" or "Dynamic",
+  "scene_count": <number>,
+  "brand_tone": "<brief description>",
+  "shot_type": "POSE ONLY" or "FRONT + POSE",
+  "transition": "NONE" or "VIDEO GEN C",
+  "skeleton_reason": "<one sentence why this skeleton was chosen in Korean>",
+  "signal_text": "<structured text for SIGNAL 03 URL/TEXT input in English — include Campaign Type, Scene Count, Genre, Tone, Scene Direction>",
+  "audio_direction": "<BGM genre, BPM range, mood in Korean>",
+  "edit_order": "<CapCut edit order description in Korean>"
+}
+
+Rules:
+- Fashion Campaign skeleton triggers on: 패션, 어패럴, 캠페인, 룩북, 스트릿웨어, 의류, 브랜드
+- Static: 포즈, 정적, 정지, 스탠딩 / Dynamic: 다이나믹, 액션, 움직임
+- POSE ONLY: 포즈/씬/영상 focused / FRONT + POSE: 룩북/커머셜
+- NONE transition: independent scenes / VIDEO GEN C: continuous narrative
+- Respond ONLY with valid JSON, no markdown, no preamble.`;
+
+    try {
+      const raw = await callClaude(systemPrompt, input, 1000);
+      const clean = raw.replace(/```json|```/g, '').trim();
+      state.analysisResult = JSON.parse(clean);
+      renderSkeletonResult(state.analysisResult);
+      renderSignalGuide(state.analysisResult);
+      renderMutatorGuide();
+      showPasteZone();
+    } catch(e) {
+      showError('분석 실패: ' + e.message);
+      hide('fc1'); hide('skeletonSection');
+    } finally {
+      document.getElementById('btnRun').disabled = false;
+    }
+  }
+
+  function renderSkeletonResult(r) {
+    document.getElementById('skeletonLoading').style.display = 'none';
+
+    const body = document.getElementById('skeletonBody');
+    body.style.display = 'block';
+    body.innerHTML = `<span class="skeleton-badge">✓ ${r.skeleton}</span>
+<strong style="color:var(--text)">${r.skeleton_reason}</strong>
+
+캠페인 타입: <span style="color:var(--lime)">${r.campaign_type}</span>   씬 수: <span style="color:var(--lime)">${r.scene_count}</span>   Shot Type: <span style="color:var(--lime)">${r.shot_type}</span>
+트랜지션: <span style="color:var(--lime)">${r.transition}</span>   브랜드 톤: ${r.brand_tone}`;
+
+    document.getElementById('skeletonStatus').style.display = 'block';
+    document.getElementById('skeletonStatus').textContent = 'CONFIRMED';
+  }
+
+  function renderSignalGuide(r) {
+    show('fc2'); show('signalSection');
+    document.getElementById('signalBody').innerHTML =
+`SIGNAL 03 — URL/TEXT 입력창에 아래 텍스트를 붙여넣으세요:
+
+<div class="highlight-box cyan">${r.signal_text}</div>
+
+SIGNAL Phase 1 → Phase 2 → Phase 3 순서로 실행 후
+THE MUTATOR에 아웃풋 투입하세요.`;
+  }
+
+  function renderMutatorGuide() {
+    show('fc3'); show('mutatorSection');
+    document.getElementById('mutatorBody').innerHTML =
+`SIGNAL 실행 완료 후 아래 순서로 진행하세요:
+
+  <span class="b-tag on-lime">INPUT A</span> + <span class="b-tag on-lime">INPUT B</span> + <span class="b-tag on-lime">INPUT C</span>  →  THE MUTATOR에 붙여넣기 후 실행
+
+THE MUTATOR 실행 완료 후:
+
+  <span class="b-tag on-lime">COPY ALL T2I</span>  →  아래 붙여넣기창 왼쪽에 붙여넣기
+  <span class="b-tag on-lime">COPY ALL I2V</span>  →  아래 붙여넣기창 오른쪽에 붙여넣기`;
+  }
+
+  function showPasteZone() {
+    show('fc4'); show('pasteSection');
+  }
+
+  // ── PASTE PROCESSING ──
+  async function processPaste() {
+    if (!state.apiKey) { showError('API KEY를 먼저 입력하세요.'); return; }
+
+    const t2i = document.getElementById('t2iPaste').value.trim();
+    const i2v = document.getElementById('i2vPaste').value.trim();
+
+    if (!t2i || !i2v) { showError('T2I와 I2V 텍스트를 모두 붙여넣으세요.'); return; }
+
+    state.t2iText = t2i;
+    state.i2vText = i2v;
+
+    // Clean I2V — remove character descriptions
+    try {
+      const cleanedI2V = await callClaude(
+        `You are a prompt editor. The user will provide I2V (image-to-video) prompts.
+Remove ALL character/person physical descriptions from each prompt.
+Keep ONLY: camera movements, scene atmosphere, lighting direction, environmental motion.
+Remove: character appearance, clothing, body descriptions, facial features.
+Return the cleaned prompts in the same format as input, preserving shot numbering.
+Respond with ONLY the cleaned prompts, no explanation.`,
+        i2v,
+        1500
+      );
+      state.i2vCleaned = cleanedI2V;
+    } catch(e) {
+      state.i2vCleaned = i2v; // fallback
+    }
+
+    // Populate panels
+    populatePanels();
+
+    // Show panels
+    show('fc5');
+    document.getElementById('panelsContainer').classList.add('visible');
+    document.getElementById('panelWrap01').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('panel01').classList.add('visible');
+    }, 50);
+
+    state.currentPanel = 1;
+    updateAllNextButtons();
+
+    // Smooth scroll
+    setTimeout(() => {
+      document.getElementById('panelWrap01').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }
+
+  // ── SHOT PARSER — "// SHOT XX\n[prompt]" 포맷 기준 ──
+  function parseShots(text) {
+    const matches = [...text.matchAll(/\/\/ SHOT (\d+)\n([\s\S]*?)(?=\n\/\/ SHOT |\s*$)/g)];
+    if (matches.length > 0) {
+      return matches.map(m => ({ num: parseInt(m[1]), prompt: m[2].trim() }));
+    }
+    // fallback: 빈 줄 기준 분리
+    const blocks = text.split(/\n\n+/).map(b => b.trim()).filter(Boolean);
+    return blocks.map((b, i) => ({ num: i + 1, prompt: b }));
+  }
+
+  function buildSceneCards(shots, type) {
+    // type: 't2i' | 'i2v'
+    return shots.map(s => {
+      const label = type === 't2i'
+        ? `SCENE ${String(s.num).padStart(2,'0')} — TEXT NODE`
+        : `SCENE ${String(s.num).padStart(2,'0')} — I2V`;
+      const escapedPrompt = s.prompt.replace(/'/g, "\\'").replace(/\n/g, '\\n');
+      return `<div class="scene-card">
+  <div class="scene-card-header">
+    <div class="scene-card-label">${label}</div>
+    <button class="scene-card-copy" onclick="copyScenePrompt(this, '${escapedPrompt}')">COPY</button>
+  </div>
+  <div class="scene-card-body">${s.prompt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+</div>`;
+    }).join('');
+  }
+
+  function copyScenePrompt(btn, escapedPrompt) {
+    const text = escapedPrompt.replace(/\\n/g, '\n').replace(/\\'/g, "'");
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'COPIED ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  function populatePanels() {
+    const r = state.analysisResult;
+
+    // ── Panel 01 — T2I 씬별 카드 ──
+    const t2iShots = parseShots(state.t2iText);
+    const t2iCards = buildSceneCards(t2iShots, 't2i');
+    document.getElementById('p01TextNodes').innerHTML =
+      `<div class="scene-cards">${t2iCards}</div>`;
+
+    // ── Panel 02 — shot type + assistant template ──
+    const shotType = r.shot_type === 'POSE ONLY'
+      ? '▸ POSE ONLY — 모델당 Pose 샷 1장 생성\n(포즈/씬/영상 목적 → Front 불필요)'
+      : '▸ FRONT + POSE — 모델당 2장 생성\n(룩북/커머셜 목적 → 착장 정면 확인 필요)';
+    document.getElementById('p02ShotType').textContent = shotType;
+
+    const poseTemplate = r.shot_type === 'POSE ONLY'
+      ? `POSE SHOT:\n"Prompt in English to generate a full-body portrait of a model similar to @MODEL [N] wearing @[PRODUCT], standing in a relaxed streetwear pose, slight weight shift, isolated on white background, soft even studio lighting, hyperrealistic, 4K"`
+      : `FRONT SHOT:\n"Prompt in English to generate a full-body front portrait of a model similar to @MODEL [N] wearing @[PRODUCT], standing upright, facing forward, isolated on white background, soft even studio lighting, hyperrealistic, 4K"\n\nPOSE SHOT:\n"Prompt in English to generate a full-body portrait of a model similar to @MODEL [N] wearing @[PRODUCT], standing in a relaxed streetwear pose, isolated on white background, soft even studio lighting, hyperrealistic, 4K"`;
+    document.getElementById('p02AssistantTemplate').textContent = poseTemplate;
+
+    // ── Panel 03 — scene list ──
+    document.getElementById('p03Template').textContent =
+      '"add the character @[Model Pose N] to the scene @[Scene N Background], adapting the light"';
+
+    let sceneList = '';
+    for (let i = 1; i <= r.scene_count; i++) {
+      sceneList += `Scene ${String(i).padStart(2,'0')}: @Model ${i} Pose + @Scene ${i} Background → Image Generator\n`;
+    }
+    document.getElementById('p03SceneList').textContent = sceneList.trim();
+
+    // ── Panel 04 — I2V 씬별 카드 ──
+    const i2vShots = parseShots(state.i2vCleaned);
+    const i2vCards = buildSceneCards(i2vShots, 'i2v');
+    document.getElementById('p04I2VPrompts').innerHTML =
+      `<div class="scene-cards">${i2vCards}</div>`;
+
+    const videoGuide = `Panel 03 합성 이미지를 각 Video Generator 노드에 연결하세요.\n씬 수: ${r.scene_count}개 → Video Generator ×${r.scene_count}`;
+    document.getElementById('p04VideoGuide').textContent = videoGuide;
+
+    const transitionText = r.transition === 'NONE'
+      ? '▸ 트랜지션 없음 — 독립 씬 구조\nPanel 05에서 CapCut으로 단순 이어붙이기'
+      : `▸ Video Gen C 필요 — 연속 내러티브 구조\n씬 ${r.scene_count}개 → 트랜지션 ${r.scene_count - 1}개 필요`;
+    document.getElementById('p04Transition').textContent = transitionText;
+
+    // ── Panel 05 ──
+    let editOrder = '타임라인 배치 순서:\n';
+    for (let i = 1; i <= r.scene_count; i++) {
+      editOrder += `Scene ${String(i).padStart(2,'0')} 영상`;
+      if (i < r.scene_count) editOrder += ' → ';
+    }
+    editOrder += '\n\nCapCut에서 순서대로 타임라인에 드래그 배치 후 익스포트';
+    document.getElementById('p05EditOrder').textContent = editOrder;
+    document.getElementById('p05Audio').textContent = r.audio_direction;
+  }
+
+  // ── PANEL NAVIGATION ──
+  function nextPanel(panelNum) {
+    const prevNum = panelNum - 1;
+    const prevId = String(prevNum).padStart(2, '0');
+
+    // Show connector + next panel
+    show(`fc_p0${prevNum}p0${panelNum}`);
+    const wrapId = `panelWrap0${panelNum}`;
+    document.getElementById(wrapId).style.display = 'block';
+    setTimeout(() => {
+      document.getElementById(`panel0${panelNum}`).classList.add('visible');
+    }, 50);
+
+    state.currentPanel = panelNum;
+
+    setTimeout(() => {
+      document.getElementById(wrapId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  }
+
+  function completePipeline() {
+    show('fc_complete');
+    show('completeBannerWrap');
+    setTimeout(() => {
+      document.getElementById('completeBannerWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  }
+
+  // ── CHECKLIST ──
+  function toggleCheck(el, panelId) {
+    el.classList.toggle('checked');
+    const checklist = document.getElementById(`checklist${panelId}`);
+    const items = checklist.querySelectorAll('.check-item');
+    const checked = checklist.querySelectorAll('.check-item.checked').length;
+    state.checkCounts[panelId] = checked;
+    document.getElementById(`status${panelId}`).textContent = `${checked} / ${items.length} 완료`;
+    updateNextButton(panelId);
+  }
+
+  function updateNextButton(panelId) {
+    const btnId = `btnNext${panelId}`;
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    const checklist = document.getElementById(`checklist${panelId}`);
+    if (!checklist) return;
+    const items = checklist.querySelectorAll('.check-item');
+    const checked = checklist.querySelectorAll('.check-item.checked').length;
+    if (checked === items.length) {
+      btn.classList.add('ready');
+    } else {
+      btn.classList.remove('ready');
+    }
+  }
+
+  function updateAllNextButtons() {
+    ['01','02','03','04','05'].forEach(id => updateNextButton(id));
+  }
+
+  // ── UTILS ──
+  function show(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'block';
+  }
+
+  function hide(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '// ERROR: ' + msg;
+    el.classList.add('visible');
+  }
+
+  function hideError() {
+    document.getElementById('errorMsg').classList.remove('visible');
+  }
+
+  function resetAll() {
+    location.reload();
+  }
+</script>
+</body>
+</html>
