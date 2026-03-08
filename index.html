@@ -735,6 +735,123 @@
     margin-bottom: 10px;
   }
 
+  /* ── ROUTE SELECTOR ── */
+  .route-selector {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    padding: 18px 20px;
+  }
+
+  .route-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+
+  .route-options {
+    display: flex;
+    gap: 10px;
+  }
+
+  .route-option {
+    flex: 1;
+    border: 1px solid var(--border2);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+  }
+
+  .route-option:hover { border-color: var(--lime); }
+
+  .route-option.selected {
+    border-color: var(--lime);
+    background: var(--lime-bg);
+  }
+
+  .route-option-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .route-option.selected .route-option-tag { color: var(--lime); }
+
+  .route-option-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .route-option.selected .route-option-title { color: var(--lime); }
+
+  .route-option-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ── B ROUTE CARDS ── */
+  .b-input-card {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    overflow: hidden;
+  }
+
+  .b-input-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface3);
+  }
+
+  .b-input-card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: var(--lime);
+    text-transform: uppercase;
+  }
+
+  .btn-copy-b {
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    letter-spacing: 2px;
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text-mid);
+    padding: 3px 9px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .btn-copy-b:hover { border-color: var(--lime); color: var(--lime); }
+  .btn-copy-b.copied { border-color: var(--lime); color: var(--lime); }
+
+  .b-input-card-body {
+    padding: 10px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
   .divider-line {
     height: 1px;
     background: var(--border2);
@@ -748,7 +865,7 @@
 <div class="header">
   <div class="header-left">
     <div class="logo">JARVIS</div>
-    <div class="logo-ver">V.01</div>
+    <div class="logo-ver">V.03</div>
     <div class="logo-sub">AI DIRECTOR TOOL</div>
   </div>
   <button class="btn-api" id="btnApiToggle" onclick="toggleApiPanel()">○ API KEY</button>
@@ -799,7 +916,33 @@
     </div>
   </div>
 
-  <!-- SIGNAL GUIDE -->
+  <!-- ROUTE SELECTOR -->
+  <div class="flow-connector" id="fc_route" style="display:none;">
+    <div class="flow-line-v"></div>
+    <div class="flow-tag">select upstream route</div>
+    <div class="flow-line-v"></div>
+    <div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="section" id="routeSection" style="display:none;">
+    <div class="route-selector">
+      <div class="route-label">// UPSTREAM ROUTE — 레퍼런스 여부를 선택하세요</div>
+      <div class="route-options">
+        <div class="route-option" id="routeA" onclick="selectRoute('A')">
+          <div class="route-option-tag">A ROUTE</div>
+          <div class="route-option-title">레퍼런스 있음</div>
+          <div class="route-option-desc">SIGNAL → THE MUTATOR → JARVIS<br>레퍼런스 영상/이미지/텍스트 기반 분석</div>
+        </div>
+        <div class="route-option" id="routeB" onclick="selectRoute('B')">
+          <div class="route-option-tag">B ROUTE</div>
+          <div class="route-option-title">목표 명확</div>
+          <div class="route-option-desc">JARVIS → THE MUTATOR → JARVIS<br>레퍼런스 없이 목표 직접 구조화</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A ROUTE: SIGNAL GUIDE -->
   <div class="flow-connector" id="fc2" style="display:none;">
     <div class="flow-line-v"></div>
     <div class="flow-tag">upstream — tool sequence</div>
@@ -827,6 +970,57 @@
         <div class="result-tag mutator">STEP 02 — THE MUTATOR</div>
       </div>
       <div class="result-body" id="mutatorBody"></div>
+    </div>
+  </div>
+
+  <!-- B ROUTE: DIRECT SHOT JSON -->
+  <div class="flow-connector" id="fc_b1" style="display:none;">
+    <div class="flow-line-v"></div>
+    <div class="flow-tag">jarvis generates shot json</div>
+    <div class="flow-line-v"></div>
+    <div class="flow-arrow-down"></div>
+  </div>
+
+  <div class="section" id="bRouteSection" style="display:none;">
+    <div class="result-block visible">
+      <div class="result-header">
+        <div class="result-tag mutator">THE MUTATOR — DIRECT INPUT</div>
+        <div id="bRouteLoading" class="loading-dots" style="display:none;"><span></span><span></span><span></span></div>
+      </div>
+      <div class="result-body" id="bRouteIntro">THE MUTATOR에 아래 세 개를 순서대로 붙여넣으세요.</div>
+      <div id="bRouteCards" style="display:none; margin-top:12px;">
+
+        <div class="b-input-card">
+          <div class="b-input-card-header">
+            <div class="b-input-card-label">INPUT A — VISUAL DNA JSON</div>
+            <button class="btn-copy-b" id="btnCopyA" onclick="copyBInput('inputA_data', this)">COPY</button>
+          </div>
+          <div class="b-input-card-body" id="inputA_display"></div>
+        </div>
+
+        <div class="b-input-card" style="margin-top:10px;">
+          <div class="b-input-card-header">
+            <div class="b-input-card-label">INPUT C — SUBJECT PROFILE</div>
+            <button class="btn-copy-b" id="btnCopyC" onclick="copyBInput('inputC_data', this)">COPY</button>
+          </div>
+          <div class="b-input-card-body" id="inputC_display"></div>
+        </div>
+
+        <div class="b-input-card" style="margin-top:10px;">
+          <div class="b-input-card-header">
+            <div class="b-input-card-label">INPUT D — MUTATION DIRECTION</div>
+            <button class="btn-copy-b" id="btnCopyD" onclick="copyBInput('inputD_data', this)">COPY</button>
+          </div>
+          <div class="b-input-card-body" id="inputD_display"></div>
+        </div>
+
+        <div style="margin-top:14px; font-family:'DM Mono',monospace; font-size:10px; color:var(--text-mid); line-height:1.7;">
+          INPUT A → THE MUTATOR <span style="color:var(--lime);">INPUT A</span> 필드에 붙여넣기<br>
+          INPUT C → THE MUTATOR <span style="color:var(--lime);">INPUT C</span> 필드에 붙여넣기<br>
+          INPUT D → THE MUTATOR <span style="color:var(--lime);">INPUT D</span> 필드에 붙여넣기<br>
+          실행 후 <span style="color:var(--lime);">COPY ALL T2I</span> + <span style="color:var(--lime);">COPY ALL I2V</span> → 아래 붙여넣기
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1162,6 +1356,8 @@ Freepik Video Generator가 이미지를 직접 참조하므로 인물 묘사 불
   let state = {
     apiKey: localStorage.getItem('claude_key') || '',
     analysisResult: null,
+    selectedRoute: null,
+    bRouteData: { inputA: '', inputC: '', inputD: '' },
     t2iText: '',
     i2vText: '',
     i2vCleaned: '',
@@ -1260,9 +1456,6 @@ Rules:
       const clean = raw.replace(/```json|```/g, '').trim();
       state.analysisResult = JSON.parse(clean);
       renderSkeletonResult(state.analysisResult);
-      renderSignalGuide(state.analysisResult);
-      renderMutatorGuide();
-      showPasteZone();
     } catch(e) {
       showError('분석 실패: ' + e.message);
       hide('fc1'); hide('skeletonSection');
@@ -1284,8 +1477,121 @@ Rules:
 
     document.getElementById('skeletonStatus').style.display = 'block';
     document.getElementById('skeletonStatus').textContent = 'CONFIRMED';
+
+    // 경로 선택 UI 표시
+    show('fc_route');
+    show('routeSection');
   }
 
+  // ── ROUTE SELECTION ──
+  function selectRoute(route) {
+    state.selectedRoute = route;
+
+    // UI 업데이트
+    document.getElementById('routeA').classList.toggle('selected', route === 'A');
+    document.getElementById('routeB').classList.toggle('selected', route === 'B');
+
+    if (route === 'A') {
+      // A경로 — 기존 SIGNAL 흐름
+      hide('fc_b1'); hide('bRouteSection');
+      renderSignalGuide(state.analysisResult);
+      renderMutatorGuide();
+      showPasteZone();
+    } else {
+      // B경로 — JARVIS 직접 Shot JSON 생성
+      hide('fc2'); hide('signalSection');
+      hide('fc3'); hide('mutatorSection');
+      hide('fc4'); hide('pasteSection');
+      show('fc_b1');
+      show('bRouteSection');
+      runBRoute();
+    }
+  }
+
+  async function runBRoute() {
+    if (!state.apiKey) { showError('API KEY를 먼저 입력하세요.'); return; }
+    const r = state.analysisResult;
+    const input = document.getElementById('mainInput').value.trim();
+
+    document.getElementById('bRouteLoading').style.display = 'flex';
+    document.getElementById('bRouteCards').style.display = 'none';
+    document.getElementById('bRouteIntro').style.display = 'block';
+
+    const systemPrompt = `You are JARVIS, an AI Director tool. Generate structured production inputs for THE MUTATOR based on the user's campaign goal.
+
+Return ONLY valid JSON with this exact structure:
+{
+  "input_a": [
+    {
+      "shot_number": 1,
+      "visual_dna": "brief role/content of this shot",
+      "location": "specific location description",
+      "camera": "camera instruction (shot type, movement)",
+      "lighting": "lighting description",
+      "duration_seconds": 3,
+      "t2i_prompt": "",
+      "i2v_prompt": ""
+    }
+  ],
+  "input_c": "Generic placeholder subject description for background image generation. Should match campaign tone. Example: a lean athletic figure in dark minimal streetwear, neutral expression, standing pose.",
+  "input_d": "Mutation direction based on campaign type and tone. Concise production direction in English."
+}
+
+Rules:
+- input_a array length must match scene_count exactly
+- Each shot must have distinct location and camera setup
+- input_c is a GENERIC placeholder subject (not the real model) — used only to generate background images, will be removed later
+- input_d should reflect campaign_type (Static/Dynamic) and brand_tone
+- Respond ONLY with valid JSON, no markdown, no preamble.`;
+
+    const userMessage = `Campaign Goal: ${input}
+
+Analysis Result:
+- Skeleton: ${r.skeleton}
+- Campaign Type: ${r.campaign_type}
+- Scene Count: ${r.scene_count}
+- Shot Type: ${r.shot_type}
+- Brand Tone: ${r.brand_tone}
+- Transition: ${r.transition}`;
+
+    try {
+      const raw = await callClaude(systemPrompt, userMessage, 2000);
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+
+      state.bRouteData = {
+        inputA: JSON.stringify(parsed.input_a, null, 2),
+        inputC: parsed.input_c,
+        inputD: parsed.input_d
+      };
+
+      renderBRouteCards();
+    } catch(e) {
+      showError('Shot JSON 생성 실패: ' + e.message);
+    } finally {
+      document.getElementById('bRouteLoading').style.display = 'none';
+    }
+  }
+
+  function renderBRouteCards() {
+    document.getElementById('bRouteIntro').style.display = 'none';
+    document.getElementById('bRouteCards').style.display = 'block';
+    document.getElementById('inputA_display').textContent = state.bRouteData.inputA;
+    document.getElementById('inputC_display').textContent = state.bRouteData.inputC;
+    document.getElementById('inputD_display').textContent = state.bRouteData.inputD;
+
+    // PASTE ZONE 표시
+    show('fc4'); show('pasteSection');
+  }
+
+  function copyBInput(dataKey, btn) {
+    const text = state.bRouteData[dataKey === 'inputA_data' ? 'inputA' : dataKey === 'inputC_data' ? 'inputC' : 'inputD'];
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'COPIED ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
   function renderSignalGuide(r) {
     show('fc2'); show('signalSection');
     document.getElementById('signalBody').innerHTML =
