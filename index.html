@@ -1437,7 +1437,7 @@ Analyze the user's production goal and return a JSON response with this exact st
   "scene_count": <number>,
   "brand_tone": "<brief description>",
   "shot_type": "POSE ONLY" or "FRONT + POSE",
-  "transition": "NONE" or "VIDEO GEN C",
+  "transition": "NONE" or "TRANSITION CUT",
   "skeleton_reason": "<one sentence why this skeleton was chosen in Korean>",
   "signal_text": "<structured text for SIGNAL 03 URL/TEXT input in English — include Campaign Type, Scene Count, Genre, Tone, Scene Direction>",
   "audio_direction": "<BGM genre, BPM range, mood in Korean>",
@@ -1448,7 +1448,7 @@ Rules:
 - Fashion Campaign skeleton triggers on: 패션, 어패럴, 캠페인, 룩북, 스트릿웨어, 의류, 브랜드
 - Static: 포즈, 정적, 정지, 스탠딩 / Dynamic: 다이나믹, 액션, 움직임
 - POSE ONLY: 포즈/씬/영상 focused / FRONT + POSE: 룩북/커머셜
-- NONE transition: independent scenes / VIDEO GEN C: continuous narrative
+- NONE transition: default — use unless user explicitly requests seamless flow between scenes / TRANSITION CUT: only when user explicitly mentions seamless transitions, flowing cuts, or continuous movement between scenes
 - Respond ONLY with valid JSON, no markdown, no preamble.`;
 
     try {
@@ -1747,7 +1747,7 @@ Respond with ONLY the cleaned prompts, no explanation.`,
 
     const transitionText = r.transition === 'NONE'
       ? '▸ 트랜지션 없음 — 독립 씬 구조\nPanel 05에서 CapCut으로 단순 이어붙이기'
-      : `▸ Video Gen C 필요 — 연속 내러티브 구조\n씬 ${r.scene_count}개 → 트랜지션 ${r.scene_count - 1}개 필요`;
+      : `▸ TRANSITION CUT 필요 — 씬 간 연속 흐름 구조\n씬 ${r.scene_count}개 → 트랜지션 컷 ${r.scene_count - 1}개 필요`;
     document.getElementById('p04Transition').textContent = transitionText;
 
     // ── Panel 05 ──
