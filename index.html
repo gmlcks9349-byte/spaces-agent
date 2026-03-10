@@ -1452,7 +1452,7 @@ Rules:
 - Respond ONLY with valid JSON, no markdown, no preamble.`;
 
     try {
-      const raw = await callClaude(systemPrompt, input, 1000);
+      const raw = await callClaude(systemPrompt, input, 2000);
       const clean = raw.replace(/```json|```/g, '').trim();
       state.analysisResult = JSON.parse(clean);
       renderSkeletonResult(state.analysisResult);
