@@ -1555,7 +1555,7 @@ Analysis Result:
 - Transition: ${r.transition}`;
 
     try {
-      const raw = await callClaude(systemPrompt, userMessage, 2000);
+      const raw = await callClaude(systemPrompt, userMessage, 4000);
       const clean = raw.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
 
